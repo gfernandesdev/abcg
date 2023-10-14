@@ -61,7 +61,7 @@ void Window::onPaint() {
   // Definindo velocidade que ele se move com base no slider definido pelo user
   auto const speed{0.1f * (m_delay * 10)};
   // usando m_position_x como posicao inicial de X (default: 0)
-  glm::vec2 const translation{m_position_x, 0};
+  glm::vec2 const translation{m_position_x, m_position_y};
   auto const translationLocation{
       abcg::glGetUniformLocation(m_program, "translation")};
   abcg::glUniform2fv(translationLocation, 1, &translation.x);
@@ -69,25 +69,40 @@ void Window::onPaint() {
   // Incrementando ou decrementando X, com base em m_direction_x (direcao que
   // esta se movendo)
   if (m_direction_x > 0) {
-    m_position_x += speed / 10000;
+    m_position_x += (speed / 10000) * std::cos(m_angle * M_PI / 180);
   } else {
-    m_position_x -= speed / 10000;
+    m_position_x -= (speed / 10000) * std::cos(m_angle * M_PI / 180);
   }
 
-  // Mudando ou seguindo na mesma direcao com base na posicao atual
-  if (m_position_x > (1.0f - (m_scale / 200) - 0.5f)) {
-    m_direction_x = -1;
-  } else if (m_position_x < -(1.0f - (m_scale / 200) - 0.5f)) {
-    m_direction_x = 1;
+  if (m_direction_y > 0) {
+    m_position_y += (speed / 10000) * std::sin(m_angle * M_PI / 180);
+  } else {
+    m_position_y -= (speed / 10000) * std::sin(m_angle * M_PI / 180);
   }
 
-  fmt::print("m_position_x {} speed {} m_direction_x {}\n", m_position_x, speed,
-             m_direction_x);
+  // Angulos
+  // colisao inferior/superior, novo angulo = 360 - m_angle
+  // colisao esquerda/direita, novo angulo = 180 - m_angle
 
   // Definindo tamanho do poligono, por padrao 25%
   auto const scale{m_scale / 100.0f};
   auto const scaleLocation{abcg::glGetUniformLocation(m_program, "scale")};
   abcg::glUniform1f(scaleLocation, scale);
+
+  // definindo mudancas de direcao
+  if (m_position_x + (scale / 2.0) >= 1.0 || m_position_x - (scale / 2.0) <= -1.0) {
+    m_direction_x = -m_direction_x;
+    m_angle = 360.0 - 30;
+
+    fmt::print("m_position_x {}  m_angle\n", m_position_x, m_angle);
+  }
+
+  if (m_position_y + (scale / 2.0) >= 1.0 || m_position_y - (scale / 2.0) <= -1.0) {
+    m_direction_y = -m_direction_y;
+    m_angle = 180.0 - 30;
+
+    fmt::print("m_position_y {}  m_angle\n", m_position_x, m_angle);
+  }
 
   // Definindo rotacao dele para quadrado ficar "correto"
   auto const rotation{M_PI / 4.0f};

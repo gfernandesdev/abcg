@@ -30,7 +30,11 @@ private:
   int m_scale{25};
 
   float m_position_x{0};
+  float m_position_y{0};
+  float m_angle{30};
+
   int m_direction_x{1};
+  int m_direction_y{1};
 
   int m_sides_of_pol{4};
 
