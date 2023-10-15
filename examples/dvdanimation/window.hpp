@@ -38,6 +38,8 @@ private:
 
   int m_sides_of_pol{4};
 
+  glm::vec4 m_current_color{0.0f, 1.0f, 1.0f, 1.0f};
+
   void setupModel(int sides);
 };
 

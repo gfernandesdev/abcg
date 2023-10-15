@@ -19,7 +19,7 @@ void Window::onCreate() {
         mat2 rotationMatrix = mat2(c, -s, s, c);
         vec2 newPosition = rotationMatrix * inPosition * scale + translation;
         gl_Position = vec4(newPosition, 0, 1);
-        fragColor = inColor * color;
+        fragColor = color;
       }
     )gl"};
 
@@ -76,6 +76,12 @@ void Window::onPaint() {
   auto const scaleLocation{abcg::glGetUniformLocation(m_program, "scale")};
   abcg::glUniform1f(scaleLocation, scale);
 
+  // Definindo cor do poligono
+  auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
+  abcg::glUniform4fv(colorLocation, 1, &m_current_color[0]);
+
+  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
+  
   // definindo mudancas de direcao
   if (m_position_x + (scale / 2.0) >= 1.0 ||
       m_position_x - (scale / 2.0) <= -1.0) {
@@ -85,9 +91,8 @@ void Window::onPaint() {
 
     m_angle = 360.0 - m_angle;
 
-    // Definindo cor do poligono
-    auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
-    abcg::glUniform4f(colorLocation, 1, 1, 1, 1);
+
+    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine), rd_color(m_randomEngine), 1};
 
     fmt::print("m_position_x {}  m_angle {}\n", m_position_x, m_angle);
   }
@@ -100,9 +105,8 @@ void Window::onPaint() {
 
     m_angle = 180.0 - m_angle;
 
-    // Definindo cor do poligono
-    auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
-    abcg::glUniform4f(colorLocation, 1, 1, 1, 1);
+    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine), rd_color(m_randomEngine), 1};
+
 
     fmt::print("m_position_y {} m_position_x {}  m_angle {}\n", m_position_y,
                m_position_x, m_angle);
