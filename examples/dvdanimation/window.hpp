@@ -23,24 +23,30 @@ private:
 
   std::default_random_engine m_randomEngine;
 
-  abcg::Timer m_timer;
-  abcg::Timer m_full_timer;
-
-  int m_delay{50};
+  int m_speed{50};
   int m_scale{25};
 
   float m_position_x{0};
   float m_position_y{0};
-  float m_angle{30};
-
-  int m_direction_x{1};
-  int m_direction_y{1};
+  int m_angle{30};
 
   int m_sides_of_pol{4};
 
-  glm::vec4 m_current_color{0.0f, 1.0f, 1.0f, 1.0f};
+  glm::vec4 m_current_color{1.0f, 1.0f, 1.0f, 1.0f};
 
   void setupModel(int sides);
+
+  enum directions { UP, DOWN, LEFT, RIGHT };
+  directions m_directionX{RIGHT};
+  directions m_directionY{UP};
+
+  enum axis { X, Y, NONE };
+  axis m_collidedAxis{NONE};
+
+  // funcoes auxiliares
+  void setRandomColor();
+  void movePolygon(float speed);
+  void handleColision(axis collidedAxis);
 };
 
 #endif

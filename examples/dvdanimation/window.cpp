@@ -44,24 +44,22 @@ void Window::onCreate() {
   m_randomEngine.seed(
       std::chrono::steady_clock::now().time_since_epoch().count());
 
-  // Generate random initial angle
+  // Gerando um angulo aleatorio entre 30 e 45
   std::uniform_int_distribution<int> rd_angle(30, 45);
   m_angle = rd_angle(m_randomEngine);
 
-  fmt::print("initial m_angle {}\n", m_angle);
+  // Gerando direcoes aleatorias
+  std::uniform_int_distribution<int> rd_direction(0, 1);
+  m_directionX = rd_direction(m_randomEngine) == 0 ? LEFT : RIGHT;
+  m_directionY = rd_direction(m_randomEngine) == 0 ? DOWN : UP;
 
-  // Generate random initial color
-  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
-  m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
-                     rd_color(m_randomEngine), 1};
+  fmt::print("Angulo inicial: {}\n", m_angle);
+
+  // Cor inicial
+  setRandomColor();
 }
 
 void Window::onPaint() {
-  // if (m_timer.elapsed() < m_delay / 1000.0) {
-  //   return;
-  // }
-  // m_timer.restart();
-
   // Definindo o poligono (default: quadrado)
   auto const sides{m_sides_of_pol};
   setupModel(sides);
@@ -71,7 +69,8 @@ void Window::onPaint() {
   abcg::glUseProgram(m_program);
 
   // Definindo velocidade que ele se move com base no slider definido pelo user
-  auto const speed{0.1f * (m_delay / 4)};
+  const float speed = 1e-6 * m_speed;
+
   // usando m_position_x como posicao inicial de X (default: 0)
   glm::vec2 const translation{m_position_x, m_position_y};
   auto const translationLocation{
@@ -91,51 +90,21 @@ void Window::onPaint() {
   auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
   abcg::glUniform4fv(colorLocation, 1, &m_current_color[0]);
 
-  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
-
   // definindo mudancas de direcao
   if (m_position_x + (scale / 2.0) >= 1.0 ||
       m_position_x - (scale / 2.0) <= -1.0) {
-
-    m_direction_x = -1.0 * m_direction_x;
-    m_direction_y = -1.0 * m_direction_y;
-
-    m_angle = 360.0 - m_angle;
-
-    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
-                       rd_color(m_randomEngine), 1};
-
-    fmt::print("m_position_x {}  m_angle {}\n", m_position_x, m_angle);
+    handleColision(X);
   }
 
   if (m_position_y + (scale / 2.0) >= 1.0 ||
       m_position_y - (scale / 2.0) <= -1.0) {
-
-    m_direction_x = -1.0 * m_direction_x;
-    m_direction_y = -1.0 * m_direction_y;
-
-    m_angle = 180.0 - m_angle;
-
-    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
-                       rd_color(m_randomEngine), 1};
-
-    fmt::print("m_position_y {} m_position_x {}  m_angle {}\n", m_position_y,
-               m_position_x, m_angle);
+    handleColision(Y);
   }
 
-  // Incrementando ou decrementando X, com base em m_direction_x (direcao que
-  // esta se movendo)
-  if (m_direction_x > 0) {
-    m_position_x += (speed / 10000) * std::cos(m_angle * M_PI / 180);
-  } else {
-    m_position_x -= (speed / 10000) * std::cos(m_angle * M_PI / 180);
-  }
+  // Movendo poligono com base na speed e direcao
+  movePolygon(speed);
 
-  if (m_direction_y > 0) {
-    m_position_y += (speed / 10000) * std::sin(m_angle * M_PI / 180);
-  } else {
-    m_position_y -= (speed / 10000) * std::sin(m_angle * M_PI / 180);
-  }
+  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
 
   // Definindo rotacao dele para quadrado ficar "correto"
   auto const rotation{M_PI / 4.0f};
@@ -165,28 +134,26 @@ void Window::onPaintUI() {
     ImGui::Begin(" ", nullptr, windowFlags);
 
     ImGui::PushItemWidth(140);
-    ImGui::SliderInt("Speed", &m_delay, 0, 200, "%d");
+    ImGui::SliderInt("Speed", &m_speed, 0, 500, "%d");
     ImGui::PopItemWidth();
 
     ImGui::PushItemWidth(140);
     ImGui::SliderInt("Scale", &m_scale, 10, 50, "%d");
     ImGui::PopItemWidth();
 
-    if (ImGui::Button("Circle", ImVec2(-1, 30))) {
-      m_sides_of_pol = 100;
+    if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
+      m_angle = -90;
     }
 
-    if (ImGui::Button("Square", ImVec2(-1, 30))) {
-      m_sides_of_pol = 4;
+    if (ImGui::Button("Angulo 45", ImVec2(-1, 30))) {
+      m_angle = 45;
     }
 
-    if (ImGui::Button("Triangle", ImVec2(-1, 30))) {
-      m_sides_of_pol = 3;
+    if (ImGui::Button("Angulo 90", ImVec2(-1, 30))) {
+      m_angle = 90;
     }
     // Limpando quadrado atual para renderizar um novo
-    if (!(m_timer.elapsed() < m_delay / 1000.0)) {
-      abcg::glClear(GL_COLOR_BUFFER_BIT);
-    }
+    abcg::glClear(GL_COLOR_BUFFER_BIT);
 
     ImGui::End();
   }
@@ -265,4 +232,42 @@ void Window::setupModel(int sides) {
 
   // End of binding to current VAO
   abcg::glBindVertexArray(0);
+}
+
+void Window::setRandomColor() {
+  // Gera uma color randomica
+  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
+  m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
+                     rd_color(m_randomEngine), 1};
+}
+
+void Window::movePolygon(float speed) {
+  // Funcao utilizada para mover o poligono
+  float nextPositionX = speed * std::cos(m_angle * M_PI / 180);
+  float nextPositionY = speed * std::sin(m_angle * M_PI / 180);
+
+  m_position_x = (m_directionX == RIGHT) ? m_position_x + nextPositionX
+                                         : m_position_x - nextPositionX;
+
+  m_position_y = (m_directionY == UP) ? m_position_y + nextPositionY
+                                      : m_position_y - nextPositionY;
+}
+
+void Window::handleColision(axis collidedAxis) {
+  // Apos colisao X e Y mudam de direcao
+  m_directionX = (m_directionX == RIGHT) ? LEFT : RIGHT;
+  m_directionY = (m_directionY == UP) ? DOWN : UP;
+
+  // Cor do poligono alterada randomicamente
+  setRandomColor();
+
+  // Define novo angulo com base no eixo que colidiu
+  if (collidedAxis == X) {
+    m_angle = 360.0 - m_angle;
+  } else if (collidedAxis == Y) {
+    m_angle = 180.0 - m_angle;
+  }
+
+  fmt::print("Colisao no eixo {}, novo angulo: {}\n",
+             collidedAxis == X ? "X" : "Y", m_angle);
 }
