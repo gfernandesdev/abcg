@@ -57,10 +57,10 @@ void Window::onCreate() {
 }
 
 void Window::onPaint() {
-  if (m_timer.elapsed() < m_delay / 1000.0) {
-    return;
-  }
-  m_timer.restart();
+  // if (m_timer.elapsed() < m_delay / 1000.0) {
+  //   return;
+  // }
+  // m_timer.restart();
 
   // Definindo o poligono (default: quadrado)
   auto const sides{m_sides_of_pol};
@@ -71,7 +71,7 @@ void Window::onPaint() {
   abcg::glUseProgram(m_program);
 
   // Definindo velocidade que ele se move com base no slider definido pelo user
-  auto const speed{0.1f * (m_delay * 10)};
+  auto const speed{0.1f * (m_delay / 4)};
   // usando m_position_x como posicao inicial de X (default: 0)
   glm::vec2 const translation{m_position_x, m_position_y};
   auto const translationLocation{
@@ -165,11 +165,11 @@ void Window::onPaintUI() {
     ImGui::Begin(" ", nullptr, windowFlags);
 
     ImGui::PushItemWidth(140);
-    ImGui::SliderInt("Speed", &m_delay, 0, 200, "%d ms");
+    ImGui::SliderInt("Speed", &m_delay, 0, 200, "%d");
     ImGui::PopItemWidth();
 
     ImGui::PushItemWidth(140);
-    ImGui::SliderInt("Scale", &m_scale, 10, 50, "%d ms");
+    ImGui::SliderInt("Scale", &m_scale, 10, 50, "%d");
     ImGui::PopItemWidth();
 
     if (ImGui::Button("Circle", ImVec2(-1, 30))) {

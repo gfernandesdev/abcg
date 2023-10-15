@@ -26,7 +26,7 @@ private:
   abcg::Timer m_timer;
   abcg::Timer m_full_timer;
 
-  int m_delay{200};
+  int m_delay{50};
   int m_scale{25};
 
   float m_position_x{0};
