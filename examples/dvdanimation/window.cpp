@@ -66,6 +66,40 @@ void Window::onPaint() {
       abcg::glGetUniformLocation(m_program, "translation")};
   abcg::glUniform2fv(translationLocation, 1, &translation.x);
 
+  // Angulos
+  // colisao inferior/superior, novo angulo = 360 - m_angle
+  // colisao esquerda/direita, novo angulo = 180 - m_angle
+
+  // Definindo tamanho do poligono, por padrao 25%
+  auto const scale{m_scale / 100.0f};
+  auto const scaleLocation{abcg::glGetUniformLocation(m_program, "scale")};
+  abcg::glUniform1f(scaleLocation, scale);
+
+  // definindo mudancas de direcao
+  if (m_position_x + (scale / 2.0) >= 1.0 ||
+      m_position_x - (scale / 2.0) <= -1.0) {
+
+    m_direction_x = -1.0 * m_direction_x;
+    m_direction_y = -1.0 * m_direction_y;
+    
+
+    m_angle = 360.0 - m_angle;
+
+    fmt::print("m_position_x {}  m_angle {}\n", m_position_x, m_angle);
+  }
+
+  if (m_position_y + (scale / 2.0) >= 1.0 ||
+      m_position_y - (scale / 2.0) <= -1.0) {
+        
+    m_direction_x = -1.0 * m_direction_x;
+    m_direction_y = -1.0 * m_direction_y;
+
+    m_angle = 180.0 - m_angle;
+
+    fmt::print("m_position_y {} m_position_x {}  m_angle {}\n", m_position_y,
+               m_position_x, m_angle);
+  }
+
   // Incrementando ou decrementando X, com base em m_direction_x (direcao que
   // esta se movendo)
   if (m_direction_x > 0) {
@@ -78,30 +112,6 @@ void Window::onPaint() {
     m_position_y += (speed / 10000) * std::sin(m_angle * M_PI / 180);
   } else {
     m_position_y -= (speed / 10000) * std::sin(m_angle * M_PI / 180);
-  }
-
-  // Angulos
-  // colisao inferior/superior, novo angulo = 360 - m_angle
-  // colisao esquerda/direita, novo angulo = 180 - m_angle
-
-  // Definindo tamanho do poligono, por padrao 25%
-  auto const scale{m_scale / 100.0f};
-  auto const scaleLocation{abcg::glGetUniformLocation(m_program, "scale")};
-  abcg::glUniform1f(scaleLocation, scale);
-
-  // definindo mudancas de direcao
-  if (m_position_x + (scale / 2.0) >= 1.0 || m_position_x - (scale / 2.0) <= -1.0) {
-    m_direction_x = -m_direction_x;
-    m_angle = 360.0 - 30;
-
-    fmt::print("m_position_x {}  m_angle\n", m_position_x, m_angle);
-  }
-
-  if (m_position_y + (scale / 2.0) >= 1.0 || m_position_y - (scale / 2.0) <= -1.0) {
-    m_direction_y = -m_direction_y;
-    m_angle = 180.0 - 30;
-
-    fmt::print("m_position_y {}  m_angle\n", m_position_x, m_angle);
   }
 
   // Definindo rotacao dele para quadrado ficar "correto"
