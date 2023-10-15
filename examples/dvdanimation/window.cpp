@@ -9,6 +9,7 @@ void Window::onCreate() {
       uniform vec2 translation;
       uniform float scale;
       uniform float rotation;
+      uniform vec4 color;
 
       out vec4 fragColor;
 
@@ -18,7 +19,7 @@ void Window::onCreate() {
         mat2 rotationMatrix = mat2(c, -s, s, c);
         vec2 newPosition = rotationMatrix * inPosition * scale + translation;
         gl_Position = vec4(newPosition, 0, 1);
-        fragColor = inColor;
+        fragColor = inColor * color;
       }
     )gl"};
 
@@ -81,20 +82,27 @@ void Window::onPaint() {
 
     m_direction_x = -1.0 * m_direction_x;
     m_direction_y = -1.0 * m_direction_y;
-    
 
     m_angle = 360.0 - m_angle;
+
+    // Definindo cor do poligono
+    auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
+    abcg::glUniform4f(colorLocation, 1, 1, 1, 1);
 
     fmt::print("m_position_x {}  m_angle {}\n", m_position_x, m_angle);
   }
 
   if (m_position_y + (scale / 2.0) >= 1.0 ||
       m_position_y - (scale / 2.0) <= -1.0) {
-        
+
     m_direction_x = -1.0 * m_direction_x;
     m_direction_y = -1.0 * m_direction_y;
 
     m_angle = 180.0 - m_angle;
+
+    // Definindo cor do poligono
+    auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
+    abcg::glUniform4f(colorLocation, 1, 1, 1, 1);
 
     fmt::print("m_position_y {} m_position_x {}  m_angle {}\n", m_position_y,
                m_position_x, m_angle);
