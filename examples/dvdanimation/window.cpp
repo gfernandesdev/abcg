@@ -43,6 +43,17 @@ void Window::onCreate() {
 
   m_randomEngine.seed(
       std::chrono::steady_clock::now().time_since_epoch().count());
+
+  // Generate random initial angle
+  std::uniform_int_distribution<int> rd_angle(30, 45);
+  m_angle = rd_angle(m_randomEngine);
+
+  fmt::print("initial m_angle {}\n", m_angle);
+
+  // Generate random initial color
+  std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
+  m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
+                     rd_color(m_randomEngine), 1};
 }
 
 void Window::onPaint() {
@@ -81,7 +92,7 @@ void Window::onPaint() {
   abcg::glUniform4fv(colorLocation, 1, &m_current_color[0]);
 
   std::uniform_real_distribution<float> rd_color(0.0f, 1.0f);
-  
+
   // definindo mudancas de direcao
   if (m_position_x + (scale / 2.0) >= 1.0 ||
       m_position_x - (scale / 2.0) <= -1.0) {
@@ -91,8 +102,8 @@ void Window::onPaint() {
 
     m_angle = 360.0 - m_angle;
 
-
-    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine), rd_color(m_randomEngine), 1};
+    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
+                       rd_color(m_randomEngine), 1};
 
     fmt::print("m_position_x {}  m_angle {}\n", m_position_x, m_angle);
   }
@@ -105,8 +116,8 @@ void Window::onPaint() {
 
     m_angle = 180.0 - m_angle;
 
-    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine), rd_color(m_randomEngine), 1};
-
+    m_current_color = {rd_color(m_randomEngine), rd_color(m_randomEngine),
+                       rd_color(m_randomEngine), 1};
 
     fmt::print("m_position_y {} m_position_x {}  m_angle {}\n", m_position_y,
                m_position_x, m_angle);
@@ -200,30 +211,22 @@ void Window::setupModel(int sides) {
   abcg::glDeleteBuffers(1, &m_VBOColors);
   abcg::glDeleteVertexArrays(1, &m_VAO);
 
-  // Select random colors for the radial gradient
-  glm::vec3 const color1{0.0f, 0.0f, 1.0f};
-  glm::vec3 const color2{0.0f, 0.0f, 1.0f};
-
   // Minimum number of sides is 3
   sides = std::max(3, sides);
 
   std::vector<glm::vec2> positions;
-  std::vector<glm::vec3> colors;
 
   // Polygon center
   positions.emplace_back(0, 0);
-  colors.push_back(color1);
 
   // Border vertices
   auto const step{M_PI * 2 / sides};
   for (auto const angle : iter::range(0.0, M_PI * 2, step)) {
     positions.emplace_back(std::cos(angle), std::sin(angle));
-    colors.push_back(color2);
   }
 
   // Duplicate second vertex
   positions.push_back(positions.at(1));
-  colors.push_back(color2);
 
   // Generate VBO of positions
   abcg::glGenBuffers(1, &m_VBOPositions);
@@ -235,8 +238,6 @@ void Window::setupModel(int sides) {
   // Generate VBO of colors
   abcg::glGenBuffers(1, &m_VBOColors);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBOColors);
-  abcg::glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3),
-                     colors.data(), GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Get location of attributes in the program
