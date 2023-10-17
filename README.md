@@ -2,8 +2,9 @@
 
 ## Integrantes 
 
-Nome: Gabriel Fernandes             RA: 11201720718
-Nome: Matheus Alexandre de Sena     RA: 11201720166
+**Nome:** Gabriel Fernandes &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; **RA:** 11201720718
+<br/>
+**Nome:** Matheus Alexandre de Sena    &nbsp; &nbsp;  **RA:** 11201720166
 
 ## Link para WebAssembly
 
