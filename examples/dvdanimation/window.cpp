@@ -3,25 +3,25 @@
 void Window::onCreate() {
   auto const *vertexShader{R"gl(#version 300 es
 
-      layout(location = 0) in vec2 inPosition;
-      layout(location = 1) in vec4 inColor;
+    layout(location = 0) in vec2 inPosition;
+    layout(location = 1) in vec4 inColor;
 
-      uniform vec2 translation;
-      uniform float scale;
-      uniform float rotation;
-      uniform vec4 color;
+    uniform vec2 translation;
+    uniform float scale;
+    uniform float rotation;
 
-      out vec4 fragColor;
+    out vec4 fragColor;
 
-      void main() {
-        float c = cos(rotation);
-        float s = sin(rotation);
-        mat2 rotationMatrix = mat2(c, -s, s, c);
-        vec2 newPosition = rotationMatrix * inPosition * scale + translation;
-        gl_Position = vec4(newPosition, 0, 1);
-        fragColor = color;
-      }
-    )gl"};
+    void main() {
+      float c = cos(rotation);
+      float s = sin(rotation);
+      mat2 rotationMatrix = mat2(c, -s, s, c);
+
+      vec2 newPosition = rotationMatrix * inPosition * scale + translation;
+      gl_Position = vec4(newPosition, 0, 1);
+      fragColor = inColor;
+    }
+  )gl"};
 
   auto const *fragmentShader{R"gl(#version 300 es
 
@@ -45,7 +45,7 @@ void Window::onCreate() {
       std::chrono::steady_clock::now().time_since_epoch().count());
 
   // Gerando um angulo aleatorio entre 30 e 45
-  std::uniform_int_distribution<int> rd_angle(30, 45);
+  std::uniform_int_distribution<int> rd_angle(0, 90);
   m_angle = rd_angle(m_randomEngine);
 
   // Gerando direcoes aleatorias
@@ -85,10 +85,6 @@ void Window::onPaint() {
   auto const scale{m_scale / 100.0f};
   auto const scaleLocation{abcg::glGetUniformLocation(m_program, "scale")};
   abcg::glUniform1f(scaleLocation, scale);
-
-  // Definindo cor do poligono
-  auto const colorLocation{abcg::glGetUniformLocation(m_program, "color")};
-  abcg::glUniform4fv(colorLocation, 1, &m_current_color[0]);
 
   // definindo mudancas de direcao
   if (m_position_x + (scale / 2.0) >= 1.0 ||
@@ -134,7 +130,7 @@ void Window::onPaintUI() {
     ImGui::Begin(" ", nullptr, windowFlags);
 
     ImGui::PushItemWidth(140);
-    ImGui::SliderInt("Speed", &m_speed, 0, 500, "%d");
+    ImGui::SliderInt("Speed", &m_speed, 0, 5000, "%d");
     ImGui::PopItemWidth();
 
     ImGui::PushItemWidth(140);
@@ -182,18 +178,22 @@ void Window::setupModel(int sides) {
   sides = std::max(3, sides);
 
   std::vector<glm::vec2> positions;
+  std::vector<glm::vec3> colors;
 
   // Polygon center
   positions.emplace_back(0, 0);
+  colors.push_back(m_current_color);
 
   // Border vertices
   auto const step{M_PI * 2 / sides};
   for (auto const angle : iter::range(0.0, M_PI * 2, step)) {
     positions.emplace_back(std::cos(angle), std::sin(angle));
+    colors.push_back(m_current_color);
   }
 
   // Duplicate second vertex
   positions.push_back(positions.at(1));
+  colors.push_back(m_current_color);
 
   // Generate VBO of positions
   abcg::glGenBuffers(1, &m_VBOPositions);
@@ -205,6 +205,8 @@ void Window::setupModel(int sides) {
   // Generate VBO of colors
   abcg::glGenBuffers(1, &m_VBOColors);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, m_VBOColors);
+  abcg::glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3),
+                     colors.data(), GL_STATIC_DRAW);
   abcg::glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   // Get location of attributes in the program
