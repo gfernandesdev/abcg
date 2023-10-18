@@ -29,7 +29,7 @@ private:
 
   std::default_random_engine m_randomEngine;
 
-  int m_speed{50};
+  int m_speed{1000};
   int m_scale{25};
 
   float m_position_x{0};

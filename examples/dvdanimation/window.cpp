@@ -57,7 +57,7 @@ void Window::onCreate() {
 
   // Cor inicial
   setRandomColor();
-} 
+}
 
 void Window::onPaint() {
   // Definindo o poligono (default: quadrado)
@@ -128,8 +128,13 @@ void Window::onPaintUI() {
 
     ImGui::Begin("Settings of animation");
 
+    ImVec4 bgSpeed =
+        ImVec4(m_current_color[0], m_current_color[1], m_current_color[2], 1);
+
     ImGui::PushItemWidth(150);
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, bgSpeed);
     ImGui::SliderInt("Speed", &m_speed, 0, 5000, "%d");
+    ImGui::PopStyleColor();
     ImGui::PopItemWidth();
 
     ImGui::PushItemWidth(150);
@@ -140,21 +145,20 @@ void Window::onPaintUI() {
     // ImGui::SliderInt("Angle", &m_angle, 0, 360, "%d deg");
     // ImGui::PopItemWidth();
 
-    // // Vertical Sliders para alterar cor
-    // ImVec4 bgRed = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    // ImVec4 bgGreen = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-    // ImVec4 bgBlue = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-
-    if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
-      m_angle = -90;
-    }
-
     if (ImGui::Button("Angulo 45", ImVec2(-1, 30))) {
       m_angle = 45;
     }
 
+    if (ImGui::Button("Angulo -45", ImVec2(-1, 30))) {
+      m_angle = -45;
+    }
+
     if (ImGui::Button("Angulo 90", ImVec2(-1, 30))) {
       m_angle = 90;
+    }
+
+    if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
+      m_angle = -90;
     }
     // Limpando quadrado atual para renderizar um novo
     abcg::glClear(GL_COLOR_BUFFER_BIT);
@@ -271,16 +275,12 @@ void Window::handleColision(axis collidedAxis) {
   // Cor do poligono alterada randomicamente
   setRandomColor();
 
-  static int tmp_angle{m_angle};
-
   // Define novo angulo com base no eixo que colidiu
   if (collidedAxis == X) {
-    tmp_angle = 360.0 - tmp_angle;
+    m_angle = 360.0 - m_angle;
   } else if (collidedAxis == Y) {
-    tmp_angle = 180.0 - tmp_angle;
+    m_angle = 180.0 - m_angle;
   }
-
-  m_angle = normalizeAngle(tmp_angle);
 
   fmt::print("Colisao no eixo {}, novo angulo: {}\n",
              collidedAxis == X ? "X" : "Y", m_angle);
