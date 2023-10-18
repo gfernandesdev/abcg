@@ -149,19 +149,13 @@ void Window::onPaintUI() {
       m_angle = 45;
     }
 
-    ImGui::Spacing();
-
     if (ImGui::Button("Angulo -45", ImVec2(-1, 30))) {
       m_angle = -45;
     }
 
-    ImGui::Spacing();
-
     if (ImGui::Button("Angulo 90", ImVec2(-1, 30))) {
       m_angle = 90;
     }
-
-    ImGui::Spacing();
 
     if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
       m_angle = -90;
