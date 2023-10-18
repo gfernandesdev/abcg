@@ -57,7 +57,7 @@ void Window::onCreate() {
 
   // Cor inicial
   setRandomColor();
-}
+} 
 
 void Window::onPaint() {
   // Definindo o poligono (default: quadrado)
@@ -120,22 +120,30 @@ void Window::onPaintUI() {
   abcg::OpenGLWindow::onPaintUI();
 
   {
-    auto const widgetSize{ImVec2(200, 170)};
-    ImGui::SetNextWindowPos(ImVec2(m_viewportSize.x - widgetSize.x - 5,
-                                   m_viewportSize.y - widgetSize.y - 5));
-    ImGui::SetNextWindowSize(widgetSize);
-    auto const windowFlags{ImGuiWindowFlags_NoResize |
-                           ImGuiWindowFlags_NoCollapse |
-                           ImGuiWindowFlags_NoTitleBar};
-    ImGui::Begin(" ", nullptr, windowFlags);
+    static auto firstTime{true};
+    if (firstTime) {
+      ImGui::SetNextWindowPos(ImVec2(5, 75));
+      firstTime = false;
+    }
 
-    ImGui::PushItemWidth(140);
+    ImGui::Begin("Settings of animation");
+
+    ImGui::PushItemWidth(150);
     ImGui::SliderInt("Speed", &m_speed, 0, 5000, "%d");
     ImGui::PopItemWidth();
 
-    ImGui::PushItemWidth(140);
+    ImGui::PushItemWidth(150);
     ImGui::SliderInt("Scale", &m_scale, 10, 50, "%d");
     ImGui::PopItemWidth();
+
+    // ImGui::PushItemWidth(150);
+    // ImGui::SliderInt("Angle", &m_angle, 0, 360, "%d deg");
+    // ImGui::PopItemWidth();
+
+    // // Vertical Sliders para alterar cor
+    // ImVec4 bgRed = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    // ImVec4 bgGreen = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
+    // ImVec4 bgBlue = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
     if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
       m_angle = -90;
@@ -263,13 +271,28 @@ void Window::handleColision(axis collidedAxis) {
   // Cor do poligono alterada randomicamente
   setRandomColor();
 
+  static int tmp_angle{m_angle};
+
   // Define novo angulo com base no eixo que colidiu
   if (collidedAxis == X) {
-    m_angle = 360.0 - m_angle;
+    tmp_angle = 360.0 - tmp_angle;
   } else if (collidedAxis == Y) {
-    m_angle = 180.0 - m_angle;
+    tmp_angle = 180.0 - tmp_angle;
   }
+
+  m_angle = normalizeAngle(tmp_angle);
 
   fmt::print("Colisao no eixo {}, novo angulo: {}\n",
              collidedAxis == X ? "X" : "Y", m_angle);
+}
+
+int Window::normalizeAngle(int angle) {
+  // normalizacao para angulo ficar entre 0 e 360
+  angle = std::fmod(angle, 360);
+
+  if (angle < 0) {
+    angle += 360;
+  }
+
+  return angle;
 }

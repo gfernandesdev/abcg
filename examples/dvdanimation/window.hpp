@@ -1,9 +1,15 @@
 #ifndef WINDOW_HPP_
 #define WINDOW_HPP_
+#define STB_IMAGE_IMPLEMENTATION
 
 #include <random>
 
 #include "abcgOpenGL.hpp"
+
+
+#include <iostream>
+#include <fstream>
+#include <vector>
 
 class Window : public abcg::OpenGLWindow {
 protected:
@@ -41,9 +47,9 @@ private:
   directions m_directionY{UP};
 
   enum axis { X, Y, NONE };
-  axis m_collidedAxis{NONE};
 
   // funcoes auxiliares
+  int normalizeAngle(int angle);
   void setRandomColor();
   void movePolygon(float speed);
   void handleColision(axis collidedAxis);
