@@ -137,25 +137,31 @@ void Window::onPaintUI() {
     ImGui::PopStyleColor();
     ImGui::PopItemWidth();
 
+    ImGui::Spacing();
+
     ImGui::PushItemWidth(150);
     ImGui::SliderInt("Scale", &m_scale, 10, 50, "%d");
     ImGui::PopItemWidth();
 
-    // ImGui::PushItemWidth(150);
-    // ImGui::SliderInt("Angle", &m_angle, 0, 360, "%d deg");
-    // ImGui::PopItemWidth();
+    ImGui::Spacing();
 
     if (ImGui::Button("Angulo 45", ImVec2(-1, 30))) {
       m_angle = 45;
     }
 
+    ImGui::Spacing();
+
     if (ImGui::Button("Angulo -45", ImVec2(-1, 30))) {
       m_angle = -45;
     }
 
+    ImGui::Spacing();
+
     if (ImGui::Button("Angulo 90", ImVec2(-1, 30))) {
       m_angle = 90;
     }
+
+    ImGui::Spacing();
 
     if (ImGui::Button("Angulo -90", ImVec2(-1, 30))) {
       m_angle = -90;
