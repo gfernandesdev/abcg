@@ -69,7 +69,7 @@ void Window::onPaint() {
   abcg::glUseProgram(m_program);
 
   // Definindo velocidade que ele se move com base no slider definido pelo user
-  const float speed = 1e-6 * m_speed;
+  const float speed = 1e-5 * m_speed;
 
   // usando m_position_x como posicao inicial de X (default: 0)
   glm::vec2 const translation{m_position_x, m_position_y};
@@ -170,8 +170,7 @@ void Window::onPaintUI() {
     abcg::glClear(GL_COLOR_BUFFER_BIT);
 
 
-    ImGui::Text("Angulo atual: %d", m_angle);
-    ImGui::Text("Angulo normalizado (0, 360): %d", normalizeAngle(m_angle));
+    ImGui::Text("Angulo atual: %d", normalizeAngle(m_angle));
     ImGui::Text("Posicao atual: (%.2f, %.2f)", m_position_x, m_position_y);
 
     ImGui::End();
