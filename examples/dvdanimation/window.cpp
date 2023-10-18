@@ -122,7 +122,7 @@ void Window::onPaintUI() {
   {
     static auto firstTime{true};
     if (firstTime) {
-      ImGui::SetNextWindowPos(ImVec2(5, 75));
+      ImGui::SetNextWindowPos(ImVec2(5, 80));
       firstTime = false;
     }
 
@@ -168,6 +168,11 @@ void Window::onPaintUI() {
     }
     // Limpando quadrado atual para renderizar um novo
     abcg::glClear(GL_COLOR_BUFFER_BIT);
+
+
+    ImGui::Text("Angulo atual: %d", m_angle);
+    ImGui::Text("Angulo normalizado (0, 360): %d", normalizeAngle(m_angle));
+    ImGui::Text("Posicao atual: (%.2f, %.2f)", m_position_x, m_position_y);
 
     ImGui::End();
   }
